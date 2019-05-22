@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--Ben Gloger-->
+<html>
+	<head>
+		<title></title>
+		<style>
+		</style>
+			
+		<script>
+			function init(){
+				CLUB = 0, DIAMOND = 2, HEART = 2, SPADE = 3;
+				ACE = 1, JACK = 11, QUEEN = 12, KING = 13;
+			
+				//cardd = [suit, val, img, flipped?];
+				
+				deck = [];
+				
+				flipped = false;
+				deckDivv = document.getElementById('deckDiv');
+				
+				createDeck();
+				
+				
+			}
+			
+			
+			/*function card(suit, val, img, showFace){
+				this.suit = suit;
+				this.showFace = false;
+				this.img = img;
+				this.val = val;
+			}*/
+			
+			function createDeck(){
+				deck = [];;
+				for(i = 1; i < 14; i++){
+					for(j = 0; j < 4; j++){
+						deck.push([j, i, i + '-' + j, flipped]);
+						
+						/*
+							var card = [];
+							card.rank = i;
+							card.suit = j;
+							card.imgname = i + '-' + j + '.png';
+						
+							deck.push[card];
+						
+						*/
+					}
+				}
+				displayDeck();
+			}
+			
+			function displayDeck(){
+				deckDivv.innerHTML = "";
+				/*
+					<img><img><img><img>
+					<img><img><img><img>
+					<img><img><img><img>
+					<img><img><img><img>
+					<img><img><img><img>
+					<img><img><img><img>
+					<img><img><img><img>
+					<img><img><img><img>
+					<img><img><img><img>
+					<img><img><img><img>
+					<img><img><img><img>
+					<img><img><img><img>
+					<img><img><img><img>
+				*/
+				for(i = 0; i < deck.length; i++){
+					if(deck[i][3] == true){
+						deckDivv.innerHTML += '<img src = "' + deck[i][2] + '.png" />';
+					}else{
+						deckDivv.innerHTML += '<img src = "back-red-75-1.png" />';
+					}
+				}
+			}
+			
+			function flipCards(){
+				flipped = !flipped;
+				
+				createDeck();
+			}
+		</script>
+	</head>
+	
+	<body onload = 'init()'> 
+		<div id = 'deckDiv'>
+		
+		
+		
+		</div>
+		<button onclick = 'flipCards()'>Flip</button>
+	</body>
+</html>

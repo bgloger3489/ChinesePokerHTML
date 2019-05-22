@@ -1,0 +1,297 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Card Game Engine Test</title>
+		<style>
+		
+		div#player0{
+			border-style: dotted;
+		}
+		
+		</style>
+		<script src = "shuffle test.js"></script>
+		<?php session_start();?>
+		<script>
+			function initialize()
+			{
+				alert('asds');
+				
+				
+				
+				 //"<?php echo $_SESSION['uname']; ?>";
+				
+				
+				
+				deck = shuffleDeck(generateStandardDeck());
+				
+				
+				STRAIGHT = 100;
+				FLUSH = 200;
+				FULLHOUSE = 300;
+				BOMB = 400;
+				STRAIGHTFLUSH = 500;
+				
+				cardsToBePlayed = [];
+				
+				allDecks = [];
+				handLength = 13;
+				
+				//cards to be played
+				
+				resethandTBPObject();
+				
+				
+				lastHandPlayed = new Object();
+				
+				lastHandPlayed.value2 = -100;
+				lastHandPlayed.value1 = -1;
+				lastHandPlayed.valueOverAll = -1;
+				lastHandPlayed.deck = [];
+				
+				
+				firstPlayofTheGame = true;
+				document.getElementById('pass').disabled = true;
+				max = 5;
+				PASSES = 0;
+				
+				
+				
+				//have a distribute display all the hands as flipped, and then use displayHands() to clear innetHTML and then display the right-side-up card images
+				distribute();
+				searchFor3();
+				
+				displayHands(0);
+				displayHands(1);
+				displayHands(2);
+				displayHands(3);
+				
+				roundStart();
+				
+			}
+			
+			function roundStart(){
+				PASSES = 0;
+				resethandTBPObject();
+				max = 5;
+				roundStartB = true;
+				updateCSSS();
+			}
+			
+			function pass(){
+				resethandTBPObject();
+				displayHands('selection');
+				PASSES++;
+				if(PLAYER == 3){
+					PLAYER = 0;
+				}else{
+					PLAYER++;
+				}
+				
+				if(PASSES == 3){
+					roundStart();
+				}
+				updateCSSS();
+			}
+			
+			function updateCSSS(){
+				displayHands(0);
+				displayHands(1);
+				displayHands(2);
+				displayHands(3);
+
+
+				document.getElementById('player' + PLAYER).style.border = 'thick solid rgb(255,100,100)';
+				for(i = 0; i < 4; i++){
+					if(i != PLAYER){
+						document.getElementById('player' + i).style.border = 'thin solid rgb(255,255,255)';
+					}
+				}
+			}
+			
+			function searchFor3(){
+				for(i = 0; i <= 3; i++){
+					for(j = 0; j < 13; j++){
+						if(allDecks[i][j].rank == 1 && allDecks[i][j].suit == 0){
+							PLAYER = i;
+							break;
+							
+						}
+					}
+				}
+			}
+			
+			
+			//REPLCAE THIS FUNCTION WITH THE AJAX SEND REQUEST FUNCTION
+			function playToBePlayed(){
+				
+				//if it is the 1st round, then the first play must include the 3 of diamonds
+				if(firstPlayofTheGame){
+					isThereA3 = false;
+					for(i = 0; i < handTBPObject.cardsToBePlayed.length; i++){
+						if(handTBPObject.cardsToBePlayed[i].rank == 1 && handTBPObject.cardsToBePlayed[i].suit == 0){
+							isThereA3 = true;
+						}
+					}
+					
+					if(!isThereA3){
+						alert('To begin the game you must play the 3 of diamonds');
+						return;
+					}else{
+						firstPlayofTheGame = false;
+						document.getElementById('pass').disabled = false;
+					}
+				}
+				//
+				
+				//FOR REGULAR ROUNDS:
+				if(handTBPObject.cardsToBePlayed.length > 0 && (handTBPObject.cardsToBePlayed.length == max || roundStartB)){
+					
+					if(lastHandPlayed.value2 + lastHandPlayed.value1 < handTBPObject.value2 + handTBPObject.value1){
+						if(roundStartB){
+							max = handTBPObject.cardsToBePlayed.length;
+						}
+						
+						
+						//set most recent play to previos play
+						lastHandPlayed.value2 = handTBPObject.value2;
+						lastHandPlayed.value1 = handTBPObject.value1;
+						lastHandPlayed.deck = handTBPObject.cardsToBePlayed;
+					
+						for(i = allDecks[PLAYER].length -1; i >= 0; i--){
+							if(allDecks[PLAYER][i].toBePlayed == true){
+							
+								allDecks[PLAYER].splice(i,1);
+								
+							}
+						}
+						displayHands(PLAYER);
+						displayHands('lastHandPlayed');
+						
+						
+						if(PLAYER == 3){
+							PLAYER = 0;
+						}else{
+							PLAYER++;
+						}
+						PASSES = 0;
+						
+						handTBPObject.cardsToBePlayed = [];
+						displayHands('selection');
+						
+						
+						//check to see if this is the first round on the server
+						//check to see if the 3 f diamojnds on the server
+						
+						roundStartB = false;
+						
+						//check on the server
+						checkWin();
+						
+						//server sends back a return string in which "INVALID" - hand sent was invalid, "1-0,5-3,12-3%%07-3,3-0" - send backs your hand%%what was previously played 
+						//write PARSE RETURN TEXT FUNCTION
+						updateCSSS();
+						
+					}else{
+						alert('this does not beat previous hand');
+					}
+				}else{
+					alert('invalid');
+				}
+			}
+			
+			function resethandTBPObject(){
+				
+				handTBPObject = new Object();
+				
+				handTBPObject.cardsToBePlayed = []
+				handTBPObject.value2 = -100;
+				handTBPObject.value1 = -1;
+				handTBPObject.phrase = 'invalid';
+			}
+			
+			function distribute(){
+			
+				for(i = 0; i < 4; i++){
+					
+					allDecks.push(deck.slice(0,handLength));
+					//alert(allDecks[i].length)
+					deck.splice(0,handLength);
+				}
+			
+			
+			
+			}
+			
+			function displayHands(whichPlayersHand){
+				if(whichPlayersHand == 'selection'){
+				//check to see if this command was called to display a hand or the cards to be played
+					var cardDestination = document.getElementById('selection');
+					cardDestination.innerHTML = '';
+					
+					for(j = 0; j < handTBPObject.cardsToBePlayed.length; j++){
+						
+						cardDestination.innerHTML += '<img src = "cardimages/' + handTBPObject.cardsToBePlayed[j].cardImg + '" onclick = "removeFromToBePlayed(' + j +' )">';
+					}
+					
+					
+					
+				}else if(whichPlayersHand == 'lastHandPlayed'){
+					var cardDestination = document.getElementById('lastHandPlayed');
+					cardDestination.innerHTML = '';
+					
+					for(j = 0; j < lastHandPlayed.deck.length; j++){
+						
+						cardDestination.innerHTML += '<img src = "cardimages/' + lastHandPlayed.deck[j].cardImg + '">';
+					}
+				}else{
+				
+					//display the jand of the desiered Player
+					var cardDestination = document.getElementById('player' + whichPlayersHand);
+					cardDestination.innerHTML = '';
+					
+					for(j = 0; j < allDecks[whichPlayersHand].length; j++){
+						if(PLAYER == whichPlayersHand){
+							cardDestination.innerHTML += '<img src = "cardimages/' + allDecks[whichPlayersHand][j].cardImg + '" onclick = "makeToBePlayed(' + j +' )">';
+						}else{
+							cardDestination.innerHTML += '<img src = "cardimages/back-red-75-2.png">'
+						}
+					}
+				}
+			}
+			
+			function checkWin(){
+				for(i = 0; i < 4; i++){
+					if(allDecks[i].length == 0){
+						alert('Player: ' + (PLAYER + 1) + ' WINS!!!');
+						allDecks = [];
+					}
+				}
+			}
+			
+		</script>
+	</head>
+	<body onload = "initialize();">
+		<!--<img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img /><img />
+		
+		<button onclick = 'moveCard()'>Move card</button>
+		-->
+		Previous Play:
+		<div id = 'lastHandPlayed'></div>
+		
+		Cards To Be Played:
+		<div id = 'selection'></div>
+		<button onclick = 'playToBePlayed()'>Play Cards</button>
+		<button onclick = 'pass()'; id = 'pass'>Pass</button>
+		
+		</br></br>
+		Player's Hands:
+		<div id = 'player0'></div>
+		<div id = 'player1'></div>
+		<div id = 'player2'></div>
+		<div id = 'player3'></div>
+		
+	
+	</body>
+	
+</html>

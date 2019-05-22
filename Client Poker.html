@@ -1,0 +1,148 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Card Game Engine Test</title>
+		<style>
+		
+		div#player0{
+			border-style: dotted;
+		}
+		
+		</style>
+		<script src = "shuffletest.js"></script>
+		<script>
+			function initialize(){			
+				
+				//deck = shuffleDeck(generateStandardDeck());
+				
+				deck = generateStandardDeck();
+				
+				hand = deck.splice(0,13);
+				
+				previousHand = [];
+				
+				toBePlayed = [];
+				
+				
+		
+				displayHands('player');
+				
+				
+				
+				setInterval(updatePrevHand, 3000);
+			}
+			
+			function test(){
+				alert('Iliketits');
+			}
+			
+			function displayHands(destination){
+				var cardDestination = document.getElementById(destination);
+				cardDestination.innerHTML = '';
+				
+				if(destination == 'prevHand'){
+					alert(req2.responseText)
+					prevHand = req2.responseText.split(',');
+					
+					for(j = 0; j < prevHand.length-1; j++){
+						cardDestination.innerHTML += '<img src = "cardimages/' + prevHand[j] + '.png">';
+					
+					}
+				
+				}else if(destination == 'toBePlayed'){
+					for(j = 0; j < hand.length; j++){
+						if(hand[j].toBePlayed == true){
+							
+							cardDestination.innerHTML += '<img src = "cardimages/' + hand[j].cardImg + '.png">';
+						}
+					}
+					//alert(toBePlayed[1].cardImg);
+				}else if(destination == 'player'){
+					for(j = 0; j < hand.length; j++){
+						
+						cardDestination.innerHTML += '<img src = "cardimages/' + hand[j].cardImg + '.png" onclick = "makeToBePlayed(' + j +' )">';
+					}
+				}
+			}
+			
+			function makeToBePlayed(cardPosition){
+				//make sure its not already in tobe played
+				
+				if(hand[cardPosition].toBePlayed == false){
+					toBePlayed.push(hand[cardPosition]);
+					hand[cardPosition].toBePlayed = true;
+					displayHands('toBePlayed');
+				}
+
+			
+			}
+			
+			
+			
+			//////////
+			function playToBePlayed(){
+				//create the string to send
+				
+				//code for string FIRST#IsWhereTheStringMustBeBrokenIntoPlayer, {all the to be played}, {all the not to be played};
+				//code for string {'1-0,1-0,1-0...'}
+				var toBePlayedString = '';
+				
+				for(i = 0; i < toBePlayed.length; i++){
+					toBePlayedString += toBePlayed[i].cardImg + ',';
+				}
+				
+				//send it to sever
+				
+				req = new XMLHttpRequest();
+					
+				req.onreadystatechange = returnToBePlayed; /*update display and arrays*/
+				url = "process hand.php?toBePlayedString=" + toBePlayedString;
+				req.open("GET", url, true);
+				req.send(null);
+				
+				
+				//server analyzes hand to make sure to beat prev hand
+				//sever sends back the now previous hand, aswell as players new hand; otherwise it will send back invalid
+			}
+			
+			function returnToBePlayed(){
+				
+				if (req.readyState == 4){
+					alert(req.responseText);
+					//document.getElementById('prevHand').innerHTML = req.responseText;
+					document.getElementById('toBePlayed').innerHTML = req.responseText;
+				}
+			}
+			
+			
+			function updatePrevHand(){
+				req2 = new XMLHttpRequest();
+					
+				req2.onreadystatechange = function(){if(req2.readyState == 4){ displayHands('prevHand');}}; //update prevHand/
+				url = "updatePrevHand.php";
+				req2.open("GET", url, true);
+				req2.send(null);
+			}
+			
+		</script>
+	</head>
+	<body onload = "initialize();">
+		
+		Previous Play:<button onclick = 'updatePrevHand()'>Receive Info</button>
+		<div id = 'prevHand'></div>
+		
+		Cards To Be Played:
+		<div id = 'toBePlayed'></div>
+		<button onclick = 'playToBePlayed()'>Play Cards</button>
+		<button onclick = 'pass()'; id = 'pass'>Pass</button>
+		
+		</br></br>
+		Player's Hands:
+		<div id = 'player'></div>
+
+		
+	
+	</body>
+	
+</html>
