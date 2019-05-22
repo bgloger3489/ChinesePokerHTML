@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Card Game Engine Test</title>
+		<style>
+		
+		div#player0{
+			border-style: dotted;
+		}
+		
+		</style>
+		<script src = "shuffle test.js"></script>
+		<?php
+			$userID = $_GET['ID'];
+			
+			$hostname = 'localhost';
+			$db = 'ben';
+			//hoststring, database, username to phpmyadmin, pass to phpmyadmin
+			$connection = new PDO("mysql:host=$hostname;dbname=$db","root","");
+	
+			$getallcmd = "SELECT * FROM `gametable`";
+			$result = $connection->prepare($getallcmd);
+			$result-> execute();
+			
+			
+			
+			$totalRows = $result->rowCount();
+			
+			$result =  $result->fetch();
+			//get all the rows where game id = 111, and if rowcount < 4, put player in that lobby. Otherwise gameID++. If no open game lobby exists, 
+			//make a database, with all game IDs, and the amount of players in each of them; Get all the rows in which #player < 4, and place user in one.
+		?>
+		<script>
+			function initialize(){			
+				
+				
+			}
+			
+		</script>
+	</head>
+	<body onload = "initialize();">
+		
+		Previous Play:
+		<div id = 'lastHandPlayed'></div>
+		
+		Cards To Be Played:
+		<div id = 'selection'></div>
+		<button onclick = 'playToBePlayed()'>Play Cards</button>
+		<button onclick = 'pass()'; id = 'pass'>Pass</button>
+		
+		</br></br>
+		Player's Hands:
+		<div id = 'player0'></div>
+		<div id = 'player1'></div>
+		<div id = 'player2'></div>
+		<div id = 'player3'></div>
+		
+	
+	</body>
+	
+</html>
